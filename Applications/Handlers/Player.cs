@@ -46,7 +46,7 @@ namespace Csharp_tictoe_game.Applications.Handlers
                         break;
                     case WsTags.Login:
                         var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
-                        var x = 10;
+                        
                         break;
                     case WsTags.Register:
                         break;
@@ -59,7 +59,7 @@ namespace Csharp_tictoe_game.Applications.Handlers
                 // TODO: handle invalid login
                 Console.WriteLine(e);
             }
-            ((WsGameServer)Server).SendAll($"{this.SessionId} send message {mess}");
+            //((WsGameServer)Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
         public void OnDisconnect()
