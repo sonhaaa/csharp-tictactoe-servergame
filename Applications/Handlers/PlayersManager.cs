@@ -3,16 +3,19 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Csharp_tictoe_game.Logging;
 
 namespace Csharp_tictoe_game.Applications.Handlers
 {
     public class PlayersManager : IPlayerManager
     {
         public ConcurrentDictionary<string, IPlayer> Players { get; set; }
+        private readonly IGameLogger _logger;
 
-        public PlayersManager()
+        public PlayersManager(IGameLogger logger)
         {
             Players = new ConcurrentDictionary<string, IPlayer>();
+            _logger = logger;
         }
 
         public void AddPlayer(IPlayer player)
@@ -20,7 +23,7 @@ namespace Csharp_tictoe_game.Applications.Handlers
             if (FindPlayer(player) == null)
             {
                 Players.TryAdd(player.SessionId, player);
-                Console.WriteLine($"List Players {Players.Count}");
+                _logger.Info($"List Players {Players.Count}");
             }
         }
 
@@ -31,8 +34,8 @@ namespace Csharp_tictoe_game.Applications.Handlers
                 Players.TryRemove(id, out var player);
                 if (player != null)
                 {
-                    Console.WriteLine($"Remove {id} success");
-                    Console.WriteLine($"List Players {Players.Count}");
+                    _logger.Info($"Remove {id} success");
+                    _logger.Info($"List Players {Players.Count}");
                 }
             }
         }

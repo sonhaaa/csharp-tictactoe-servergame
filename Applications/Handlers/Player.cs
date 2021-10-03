@@ -1,6 +1,8 @@
 ﻿using Csharp_tictoe_game.Applications.Interfaces;
 using Csharp_tictoe_game.Applications.Messaging;
 using Csharp_tictoe_game.Applications.Messaging.Constants;
+using Csharp_tictoe_game.GameModels;
+using Csharp_tictoe_game.Logging;
 using NetCoreServer;
 using System;
 using System.Collections.Generic;
@@ -15,15 +17,18 @@ namespace Csharp_tictoe_game.Applications.Handlers
         public string SessionId { get; set; }
         public string Name { get; set; }
         private bool IsDisconnected { get; set; }
+        private IGameLogger _logger;
+
         public Player(WsServer server) : base(server)
         {
             SessionId = this.Id.ToString();
             IsDisconnected = false;
+            _logger = new GameLogger();
         }
 
         public override void OnWsConnected(HttpRequest request)
         {
-            Console.WriteLine("Player connected");
+            _logger.Info("Player connected");
             IsDisconnected = false;
         }
 
@@ -46,7 +51,8 @@ namespace Csharp_tictoe_game.Applications.Handlers
                         break;
                     case WsTags.Login:
                         var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
-                        
+                        var user = new User(username: "sonha", password: "s0nhA", displayName: "sonhavip");
+                        var x = 1;
                         break;
                     case WsTags.Register:
                         break;
@@ -57,14 +63,15 @@ namespace Csharp_tictoe_game.Applications.Handlers
             catch (Exception e)
             {
                 // TODO: handle invalid login
-                Console.WriteLine(e);
+                _logger.Error("OnWsReceived error", e);
             }
             //((WsGameServer)Server).SendAll($"{this.SessionId} send message {mess}");
         }
 
         public void OnDisconnect()
         {
-            ((WsGameServer)Server).PlayerManager.RemovePlayer(this);
+            _logger.Warning("Player disconnected", null);
+            //((WsGameServer)Server).PlayerManager.RemovePlayer(this);
         }
 
         public bool SendMessage(string mes)
