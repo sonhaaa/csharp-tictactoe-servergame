@@ -3,6 +3,9 @@ using Csharp_tictoe_game.Applications.Messaging;
 using Csharp_tictoe_game.Applications.Messaging.Constants;
 using Csharp_tictoe_game.GameModels;
 using Csharp_tictoe_game.Logging;
+using GameDatabase.Mondodb.Interfaces;
+using GameDatabase.Mongodb.Handlers;
+using MongoDB.Driver;
 using NetCoreServer;
 using System;
 using System.Collections.Generic;
@@ -17,13 +20,15 @@ namespace Csharp_tictoe_game.Applications.Handlers
         public string SessionId { get; set; }
         public string Name { get; set; }
         private bool IsDisconnected { get; set; }
-        private IGameLogger _logger;
+        private readonly IGameLogger _logger;
+        private IGameDB<User> UsersDb { get; set; }
 
-        public Player(WsServer server) : base(server)
+        public Player(WsServer server, IMongoDatabase mongoDatabase) : base(server)
         {
             SessionId = this.Id.ToString();
             IsDisconnected = false;
             _logger = new GameLogger();
+            UsersDb = new MongoHandler<User>(mongoDatabase);
         }
 
         public override void OnWsConnected(HttpRequest request)
@@ -51,8 +56,8 @@ namespace Csharp_tictoe_game.Applications.Handlers
                         break;
                     case WsTags.Login:
                         var loginData = GameHelper.ParseStruct<LoginData>(wsMess.Data.ToString());
-                        var user = new User(username: "sonha", password: "s0nhA", displayName: "sonhavip");
-                        var x = 1;
+                        var user = new User(username: loginData.Username , password: loginData.Password, displayName: "");
+                        var newUser = UsersDb.Create(user);
                         break;
                     case WsTags.Register:
                         break;

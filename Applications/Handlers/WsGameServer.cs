@@ -1,5 +1,6 @@
 ﻿using Csharp_tictoe_game.Applications.Interfaces;
 using Csharp_tictoe_game.Logging;
+using GameDatabase.Mongodb.Handlers;
 using NetCoreServer;
 using System;
 using System.Net;
@@ -11,20 +12,22 @@ namespace Csharp_tictoe_game.Applications.Handlers
     {
         private readonly int _port;
         private readonly IPlayerManager _playerManager;
-        private readonly IGameLogger _logger; 
+        private readonly IGameLogger _logger;
+        private readonly MongoDb _mongoDB;
 
-        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger) : base(address, port)
+        public WsGameServer(IPAddress address, int port, IPlayerManager playerManager, IGameLogger logger, MongoDb mongoDb) : base(address, port)
         {
             _port = port;
             _playerManager = playerManager;
             _logger = logger;
+            _mongoDB = mongoDb;
         }
 
         protected override TcpSession CreateSession()
         {
             // TODO: handle new session
             _logger.Info("New Session connected");
-            var player = new Player(this);
+            var player = new Player(this, _mongoDB.GetDatabase());
             _playerManager.AddPlayer(player);
             return player;
         }
